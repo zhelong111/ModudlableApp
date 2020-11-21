@@ -1,0 +1,4 @@
+include ':commonlib'
+include ':home'
+include ':app', ':chat'
+rootProject.name = "ModulableApp"
