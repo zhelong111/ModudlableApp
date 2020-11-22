@@ -85,6 +85,7 @@ dependencies {
     implementation project(':commonlib') // 通用公共库
     implementation project(':commonservice') // 本项目相关的公共服务库
 
+    // 依赖业务库
     if(isNeedChat.toBoolean()) {
         implementation project(':chat')
     }
