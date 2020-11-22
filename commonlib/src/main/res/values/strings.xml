@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">commonlib</string>
+    <string name="error_msg">发生错误</string>
 </resources>

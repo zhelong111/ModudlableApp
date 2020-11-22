@@ -23,10 +23,34 @@ android {
         }
     }
 
+    signingConfigs {
+        release {//发布版本的签名配置
+            storeFile file('D:/keys/imageim_mirror.jks')
+            keyAlias "imageim"
+            storePassword "imageim"
+            keyPassword "imageim"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            // shrinkResources true //是否清理无用资源,依赖于minifyEnabled
+            // zipAlignEnabled true //是否启用zipAlign压缩
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            signingConfig signingConfigs.release
+
+            android.applicationVariants.all { variant ->
+                variant.outputs.all {
+                    if (variant.buildType.name.equals('release')) {
+                        outputFileName = "YiMirror_${defaultConfig.versionName}_${releaseTime()}_release_ToB.apk"
+                    } else if (variant.buildType.name.equals('debug')) {
+                        outputFileName = "YiMirror_${defaultConfig.versionName}_${releaseTime()}_debug_ToB.apk"
+                    }
+                }
+            }
+
         }
     }
     compileOptions {
@@ -34,6 +58,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
+
+static def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
 
 dependencies {
 
@@ -53,7 +82,8 @@ dependencies {
     // EventBus
     implementation 'org.greenrobot:eventbus:3.2.0'
 
-    implementation project(':commonlib')
+    implementation project(':commonlib') // 通用公共库
+    implementation project(':commonservice') // 本项目相关的公共服务库
 
     if(isNeedChat.toBoolean()) {
         implementation project(':chat')

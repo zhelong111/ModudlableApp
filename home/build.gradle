@@ -49,6 +49,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation project(':commonlib')
+    implementation project(':commonservice') // 本项目相关的公共服务库
 
     // 组件之间路由和通讯的ARooter
     implementation 'com.alibaba:arouter-api:1.5.1'

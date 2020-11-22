@@ -1,3 +1,4 @@
+include ':commonservice'
 include ':commonlib'
 include ':home'
 include ':app', ':chat'
