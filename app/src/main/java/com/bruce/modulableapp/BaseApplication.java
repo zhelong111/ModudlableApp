@@ -4,6 +4,8 @@ import android.app.Application;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 
+import exception.AppUncaughtExceptionHandler;
+import exception.SdcardConfig;
 import network.retrofit.RetrofitManager;
 
 public class BaseApplication extends Application {
@@ -13,6 +15,7 @@ public class BaseApplication extends Application {
         
        initRoute();
        initNetwork();
+       initCrash();
     }
 
     private void initRoute() {
@@ -25,5 +28,15 @@ public class BaseApplication extends Application {
 
     private void initNetwork() {
         RetrofitManager.init("https://www.google.com");
+    }
+
+    private void initCrash() {
+        /**
+         * 初始化异常捕获
+         */
+        // 初始化文件目录
+        SdcardConfig.getInstance().initSdcard();
+        // 捕捉异常
+        AppUncaughtExceptionHandler.getInstance().init(this);
     }
 }

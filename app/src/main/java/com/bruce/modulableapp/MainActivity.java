@@ -8,6 +8,8 @@ import android.view.View;
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.bruce.moduleapp.chat.ChatUtil;
 
+import network.httpclient.NetUtil;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 
