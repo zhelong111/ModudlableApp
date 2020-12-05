@@ -1,14 +1,10 @@
 package com.bruce.modulableapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.View;
-
+import androidx.appcompat.app.AppCompatActivity;
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.bruce.moduleapp.chat.ChatUtil;
-
-import network.httpclient.NetUtil;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
