@@ -27,14 +27,6 @@ public class CacheUtils {
         if (mmkv == null) {
             mmkv = MMKV.defaultMMKV();
         }
-
-        //SharedPreferences 迁移
-        //        if (preferences == null) {
-        //            preferences = MMKV.mmkvWithID(CACHE_FILE_NAME);
-        //            SharedPreferences old_man = BaseApplication.getContext().getSharedPreferences(CACHE_FILE_NAME, Context.MODE_PRIVATE);
-        //            preferences.importFromSharedPreferences(old_man);
-        //            old_man.edit().clear().commit();
-        //        }
         return mmkv;
     }
 
