@@ -45,6 +45,10 @@ dependencies {
     implementation 'com.alibaba:arouter-api:1.5.1'
     annotationProcessor 'com.alibaba:arouter-compiler:1.5.1'
 
+    // Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.8.1'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+
     implementation project(':commonlib') // 通用公共库
 
 }

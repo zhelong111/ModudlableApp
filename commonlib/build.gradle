@@ -52,6 +52,8 @@ dependencies {
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.8.1'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    // OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     //anim
     implementation rootProject.ext.dependencies["nineoldandroids"]
 //    implementation 'com.tencent:mmkv-static:1.2.5'
