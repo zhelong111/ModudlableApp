@@ -1,6 +1,5 @@
 package util;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
@@ -154,4 +153,6 @@ public class FileUtil {
         }
         return file.getAbsolutePath();
     }
+
+
 }

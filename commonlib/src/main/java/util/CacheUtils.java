@@ -1,6 +1,6 @@
 package util;
 
-import android.content.SharedPreferences;
+import android.content.Context;
 
 import com.tencent.mmkv.MMKV;
 
@@ -9,11 +9,12 @@ import com.tencent.mmkv.MMKV;
  */
 public class CacheUtils {
 
-    private static final String TAG = "CacheUtils";
+    private static final String TAG = CacheUtils.class.getName();
 
-    private static SharedPreferences mSharedPreferences;
-    private static String CACHE_FILE_NAME = "yimirrorcache";
-    private static MMKV mmkv;
+    public static void init(Context context) {
+        String rootDir = MMKV.initialize(context);
+        LogUtil.d(TAG, "mmkv root: " + rootDir);
+    }
 
     /**
      * MMKV支持的数据类型
@@ -24,10 +25,7 @@ public class CacheUtils {
      * 任何实现了Parcelable的类型
      */
     public static MMKV getPreferences() {
-        if (mmkv == null) {
-            mmkv = MMKV.defaultMMKV();
-        }
-        return mmkv;
+        return MMKV.defaultMMKV();
     }
 
 

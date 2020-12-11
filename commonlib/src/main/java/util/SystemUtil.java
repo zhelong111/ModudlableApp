@@ -3,12 +3,15 @@ package util;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
+import java.io.File;
 import java.lang.reflect.Method;
 
 /**
@@ -125,4 +128,19 @@ public class SystemUtil {
             }
         });
     }
+
+
+    /**
+     * 安装apk
+     * @param context
+     * @param file
+     */
+    public static void installApp(Context context, File file) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+        context.startActivity(intent);
+    }
+
+
 }

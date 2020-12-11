@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import data.Constants;
-import network.httpclient.constants.NetConstants;
+import network.constants.NetConstants;
 import util.AppUtil;
 import util.LogUtil;
 import util.UserUtil;

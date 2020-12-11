@@ -1,6 +1,10 @@
 package network.retrofit;
 
 import android.content.Context;
+
+import com.ihsanbal.logging.Level;
+import com.ihsanbal.logging.LoggingInterceptor;
+
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -12,33 +16,42 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+
+import network.retrofit.interceptor.DefaultInterceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.internal.platform.Platform;
 
 public class OkHttpProxy {
     public static OkHttpClient getClient(Context context) {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
-                .sslSocketFactory(getSSLSocketFactory(context, certificates), new CustomTrustManager())
+//                .sslSocketFactory(getSSLSocketFactory(context, certificates), new CustomTrustManager())
+                .sslSocketFactory(getSSLSocketFactory(), new CustomTrustManager())
                 .hostnameVerifier(getHostnameVerifier())
+                .addInterceptor(new DefaultInterceptor())
+                .addInterceptor(new LoggingInterceptor.Builder()
+                        .setLevel(Level.BASIC)
+                        .build())
                 .build();
         return okHttpClient;
     }
 
-//    public static SSLSocketFactory getSSLSocketFactory() {
-//        SSLSocketFactory ssfFactory = null;
-//
-//        try {
-//            SSLContext sc = SSLContext.getInstance("TLS");
-//            sc.init(null, new TrustManager[]{new CustomTrustManager()}, new SecureRandom());
-//            ssfFactory = sc.getSocketFactory();
-//        } catch (Exception e) {
-//        }
-//
-//        return ssfFactory;
-//    }
+    public static SSLSocketFactory getSSLSocketFactory() {
+        SSLSocketFactory ssfFactory = null;
+
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, new TrustManager[]{new CustomTrustManager()}, new SecureRandom());
+            ssfFactory = sc.getSocketFactory();
+        } catch (Exception e) {
+        }
+
+        return ssfFactory;
+    }
 
     public static class CustomTrustManager implements X509TrustManager {
 
@@ -95,7 +108,7 @@ public class OkHttpProxy {
         return sslContext.getSocketFactory();
     }
 
-    public  static String urls[] = {"host1","host2"};
+    public  static String urls[] = {"timgsa.baidu.com","baidu.com"};
 
     public static HostnameVerifier getHostnameVerifier() {
 

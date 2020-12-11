@@ -27,12 +27,6 @@ public class LogUtil {
      * 是否是发布版本
      */
      public static final boolean ISRELEASE = "release".equals(BuildConfig.BUILD_TYPE);
-//    public static final boolean ISRELEASE = false;
-
-    /**
-     * 当前log打印最高级别
-     */
-    public static final int CURRENT_LEVEL = ASSERT;
 
     public static void v(String tag, String msg) {
         if (ISRELEASE) {
