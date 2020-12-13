@@ -7,9 +7,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+
+import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -19,6 +22,8 @@ import java.lang.reflect.Method;
  */
 
 public class SystemUtil {
+
+    private static final String TAG = SystemUtil.class.getName();
     /**
      * 隐藏虚拟按键，并且设置成全屏
      */
@@ -130,17 +135,22 @@ public class SystemUtil {
     }
 
 
-    /**
-     * 安装apk
-     * @param context
-     * @param file
-     */
-    public static void installApp(Context context, File file) {
+    public static void installApp(Context context, String filePath) {
+        Log.i(TAG, "开始执行安装: " + filePath);
+        File apkFile = new File(filePath);
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Log.w(TAG, "版本大于 N ，开始使用 fileProvider 进行安装");
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri contentUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider"
+                    , apkFile);
+            intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+        } else {
+            Log.w(TAG, "正常进行安装");
+            intent.setDataAndType(Uri.fromFile(apkFile), "application/vnd.android.package-archive");
+        }
         context.startActivity(intent);
     }
-
 
 }

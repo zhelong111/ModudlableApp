@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ThreadPoolManager {
 	private volatile static ThreadPoolManager instance =null;
 	private static final int CORE_POOL_SIZE = 5;
-	private static final int MAXIMUM_POOL_SIZE = 20;
+	private static final int MAXIMUM_POOL_SIZE = 30;
 	private static final int KEEP_ALIVE = 1;
 
 	private static final ThreadFactory sThreadFactory = new ThreadFactory() {
@@ -32,10 +32,10 @@ public class ThreadPoolManager {
 	}
 	
 	public static ThreadPoolManager getInstance(){
-		if(instance==null){
+		if(instance == null){
 			synchronized (ThreadPoolManager.class) {
-				if(instance==null)
-					instance =new ThreadPoolManager();
+				if(instance == null)
+					instance = new ThreadPoolManager();
 			}
 		}
 		return instance;

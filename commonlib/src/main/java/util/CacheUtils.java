@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.tencent.mmkv.MMKV;
 
+import java.lang.reflect.Proxy;
+
 /**
  * @Description 数据缓存工具类
  */
@@ -16,16 +18,12 @@ public class CacheUtils {
         LogUtil.d(TAG, "mmkv root: " + rootDir);
     }
 
-    /**
-     * MMKV支持的数据类型
-     * 支持以下 Java 语言基础类型：
-     * boolean、int、long、float、double、byte[]
-     * 支持以下 Java 类和容器：
-     * String、Set<String>
-     * 任何实现了Parcelable的类型
-     */
+    private static class MMKVProxy {
+        private static MMKV instance = MMKV.defaultMMKV();
+    }
+
     public static MMKV getPreferences() {
-        return MMKV.defaultMMKV();
+        return MMKVProxy.instance;
     }
 
 
@@ -45,9 +43,13 @@ public class CacheUtils {
         } catch (Exception e) {
             LogUtil.e(TAG, e.getMessage());
         }
-
         return null;
     }
+
+    public static void remove(String key) {
+        getPreferences().removeValueForKey(key);
+    }
+
 
     public static void setBoolean(String key, boolean value) {
         getPreferences().encode(key, value);

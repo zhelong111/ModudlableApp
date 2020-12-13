@@ -486,44 +486,6 @@ public class AppUtil {
         return Build.VERSION.RELEASE;
     }
 
-    /**
-     * 是否连接网络
-     *
-     * @param context
-     * @return
-     */
-    public static boolean isOnline(Context context) {
-        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo info = manager.getActiveNetworkInfo();
-        return info != null && info.isConnected();
-    }
-
-    public boolean isMobileConnected(Context context) {
-        if (context != null) {
-            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
-                    .getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo mMobileNetworkInfo = mConnectivityManager
-                    .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-            if (mMobileNetworkInfo != null) {
-                return mMobileNetworkInfo.isAvailable();
-            }
-        }
-        return false;
-    }
-
-    public boolean isWifiConnected(Context context) {
-        if (context != null) {
-            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
-                    .getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo mWiFiNetworkInfo = mConnectivityManager
-                    .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            if (mWiFiNetworkInfo != null) {
-                return mWiFiNetworkInfo.isAvailable();
-            }
-        }
-        return false;
-    }
-
     public static int getConnectedType(Context context) {
         if (context != null) {
             ConnectivityManager mConnectivityManager = (ConnectivityManager) context
@@ -535,26 +497,6 @@ public class AppUtil {
         }
         return -1;
     }
-
-    /**
-     * 获取wifi名称
-     * @param context
-     * @return
-     */
-    public static String getConnectWifiSsid(Context context){
-//        WifiManager wifiManager = (WifiManager) context.getSystemService(WIFI_SERVICE);
-//        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-//        Log.d("wifiInfo", wifiInfo.toString());
-//        Log.d("SSID",wifiInfo.getSSID());
-//        return wifiInfo.getSSID();
-
-        LogUtil.d("sys version", getSysVersion());
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        String ssid = networkInfo.getExtraInfo();
-        return ssid;
-    }
-
 
 
 //    /**

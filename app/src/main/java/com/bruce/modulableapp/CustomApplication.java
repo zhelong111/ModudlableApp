@@ -16,6 +16,7 @@ public class CustomApplication extends BaseApplication {
         initNetwork();
         initCrash();
         CacheUtils.init(this);
+//        GreenDaoManager.getInstance();
     }
 
 

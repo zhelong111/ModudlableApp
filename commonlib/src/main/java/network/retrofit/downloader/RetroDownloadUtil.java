@@ -2,6 +2,7 @@ package network.retrofit.downloader;
 
 import android.content.Context;
 import android.util.Log;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,7 +11,6 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
 import common.BaseApplication;
-import data.ContentType;
 import okhttp3.ResponseBody;
 import util.CacheUtils;
 import util.LogUtil;
@@ -122,9 +122,14 @@ public class RetroDownloadUtil {
     }
 
 
-
+    /**
+     * 应用卸载也会删掉该目录
+     * @param context
+     * @return
+     */
     public static String getDownloadDir(Context context) {
         String dir = context.getExternalFilesDir(null).getAbsolutePath();
+//        String dir = context.getFilesDir().getAbsolutePath();
         LogUtil.d(TAG, dir);
         return dir;
     }

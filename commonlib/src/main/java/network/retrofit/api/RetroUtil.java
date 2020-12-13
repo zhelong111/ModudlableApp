@@ -105,7 +105,7 @@ public class RetroUtil {
     // ----------------------------------------------- File upload and download -------------------------------------------
 
     /**
-     * 下载文件，无进度
+     * 下载文件
      * @param url
      * @param listener
      */
@@ -136,30 +136,6 @@ public class RetroUtil {
             }
         });
     }
-
-    public static void downloadFileWithProgress(String url, FileTransferListener listener) {
-        long range = CacheUtils.getLong(url, 0L);
-        TransferApi transferApi = RetrofitManager.getInstance().createTransferApi(TransferApi.class, listener);
-        Call<DownloadResponseBody> call = transferApi.download(url, "bytes=" + range + "-");
-        call.enqueue(new Callback<DownloadResponseBody>() {
-            @Override
-            public void onResponse(Call<DownloadResponseBody> call, Response<DownloadResponseBody> response) {
-                listener.onFinish("file..");
-            }
-
-            @Override
-            public void onFailure(Call<DownloadResponseBody> call, Throwable t) {
-                listener.onFail(t.toString());
-            }
-        });
-
-    }
-
-
-
-
-
-
 
 
 //    /**

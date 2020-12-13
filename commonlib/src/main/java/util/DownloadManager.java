@@ -22,8 +22,6 @@ import network.httpclient.ThreadPoolManager;
 
 public class DownloadManager {
     private static DownloadManager instance;
-    private static final int MAX_THREAD_NUM = 5;
-    private int threadNum = 0;
     private static final int ERROR_INVALID_URL = 0x301;
 
 
@@ -114,87 +112,4 @@ public class DownloadManager {
         return file.getAbsolutePath();
     }
 
-    // ---------------------------------------- Fast download module ----------------------------------------
-
-//    class CutFileElement {
-//        int startPos;
-//        int len;
-//        int currPos;
-//
-//        public CutFileElement(int startPos, int len) {
-//            this.startPos = startPos;
-//            this.currPos = startPos;
-//            this.len = len;
-//        }
-//    }
-//
-//    /**
-//     * 切割片段
-//     * @param contentLength
-//     * @return
-//     */
-//    public List<CutFileElement> getCuts(int contentLength) {
-//        int cutLen = contentLength / MAX_THREAD_NUM;
-//        List<CutFileElement> cutList = new ArrayList<>();
-//        for (int i = 0; i < MAX_THREAD_NUM; i++) {
-//            CutFileElement cut;
-//            if (i < MAX_THREAD_NUM - 1) {
-//                cut = new CutFileElement(i * cutLen, cutLen);
-//            } else {
-//                cut = new CutFileElement(i * cutLen, cutLen + contentLength % cutLen);
-//            }
-//            cutList.add(cut);
-//        }
-//        return cutList;
-//    }
-//
-//    class DownloadTask {
-//        float progress;
-//        List<CutFileElement> cutList;
-//        String url;
-//        String localPath;
-//
-//        public DownloadTask(String url) {
-//            this.url = url;
-//            this.localPath = getLocalPath(url);
-//        }
-//    }
-//
-//    public interface DownloadTaskCallback {
-//        void onTaskStart(String fileUrl);
-//        void onTaskProgress(String fileUrl, float progress);
-//        void onTaskSuccess(String fileUrl, String localPath);
-//        void onTaskFail(String fileUrl, int errorCode, String errorMsg);
-//    }
-//
-//    public void download(String fileUrl, DownloadTaskCallback taskCallback) {
-//        try {
-//            URL url = new URL(fileUrl);
-//            URLConnection connection = url.openConnection();
-//            connection.setConnectTimeout(1000 * 10);
-//            connection.setReadTimeout(1000 * 30);
-//            InputStream is = connection.getInputStream();
-//            BufferedInputStream bis = new BufferedInputStream(is);
-//            int contentLength = connection.getContentLength();
-//            List<CutFileElement> cutList = getCuts(contentLength);
-//            DownloadTask task = new DownloadTask(fileUrl);
-//            task.cutList = cutList;
-//            for (int i = 0; i < cutList.size(); i++) {
-//                CutFileElement cut = cutList.get(i);
-//
-//            }
-//        } catch (IOException e) {
-//
-//        }
-//    }
-//
-//    private void downloadCut(String url, CutFileElement cut, BufferedInputStream bis) {
-//        try {
-//            bis.skip(cut.startPos);
-//            int len = 0;
-////            bis.read
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 }
