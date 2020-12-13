@@ -26,18 +26,20 @@ public class Downloader {
 
     private static final String TAG = Downloader.class.getName();
     private DownloadEntity entity;
-    private static final int TIME_OUT = 5000;
     private int status = 0;
     private DownloadListener listener;
     private static final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     // 事件标志位
-    private int cancelNum = 0;
-    private int stopNum = 0;
-    private int failNum = 0; // 异常导致失败的线程数
-    private boolean isDownloading; // 是否正在下载
-    private boolean isCancel; // 是否取消下载
-    private boolean isStop; // 是否暂停
+    private volatile int cancelNum = 0;
+    private volatile int stopNum = 0;
+    private volatile int completeNum = 0;
+    private volatile int failNum = 0; // 异常导致失败的线程数
+    private volatile boolean isDownloading; // 是否正在下载
+    private volatile boolean isCancel; // 是否取消下载
+    private volatile boolean isStop; // 是否暂停
+    private volatile boolean isFail; // 是否失败
+    private int unFinishNum = DownloadUtil.threadNum;
 
     public Downloader(DownloadEntity entity, DownloadListener listener) {
         this.entity = entity;
@@ -54,17 +56,19 @@ public class Downloader {
 
         @Override
         public void run() {
+            LogUtil.d(TAG, Thread.currentThread() + " is started");
             RandomAccessFile file = null;
             InputStream is = null;
+            HttpURLConnection conn = null;
             try {
                 URL netUrl = new URL(task.getFileUrl());
-                HttpURLConnection conn = (HttpURLConnection)netUrl.openConnection();
+                conn = (HttpURLConnection)netUrl.openConnection();
                 //在头里面请求下载开始位置和结束位置
                 conn.setRequestProperty("Range", "bytes=" + (task.getStartPos() + task.getDownloadedSize()) + "-" + task.getEndPos());
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("Charset", "UTF-8");
-                conn.setConnectTimeout(TIME_OUT);
-                conn.setReadTimeout(TIME_OUT);  //设置读取流的等待时间,必须设置该参数
+                conn.setConnectTimeout(60 * 1000);
+                conn.setReadTimeout(15 * 1000);  //设置读取流的等待时间,必须设置该参数
                 conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.2; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)");
                 conn.setRequestProperty("Accept", "image/gif, image/jpeg, image/pjpeg, image/pjpeg, application/x-shockwave-flash, application/xaml+xml, application/vnd.ms-xpsdocument, application/x-ms-xbap, application/x-ms-application, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, */*");
                 //创建可设置位置的文件
@@ -74,7 +78,10 @@ public class Downloader {
                 file.seek(task.getStartPos() + task.getDownloadedSize());
                 byte[] buffer = new byte[2048];
                 int len;
-                while ((len = is.read(buffer)) != -1) {
+                while ((len = is.read(buffer)) != -1 && !isFail) {
+                    if (task.getDownloadedSize() == (task.getEndPos() - task.getStartPos() + 1)) { // 当前任务完成
+                        break;
+                    }
                     if (isCancel) {
                         LogUtil.d(TAG, Thread.currentThread() + " is canceled");
                         break;
@@ -88,30 +95,45 @@ public class Downloader {
                     task.setDownloadedSize(task.getDownloadedSize() + len);
                     synchronized (entity) {
                         entity.setDownloadedSize(entity.getDownloadedSize() + len);
-                        CacheUtils.setBean(entity.getFileUrl(), entity);
+                        entity.syncToDb();
                         listener.onProgress(entity.getFileUrl(), entity.getDownloadedSize(), entity.getFileLength());
-                        if (entity.getDownloadedSize() == entity.getFileLength()) { // complete download
+                    }
+//                    LogUtil.d(TAG, "isDownloading -->" + isDownloading + " -> " + entity.getDownloadedSize());
+                } // while
+                file.close();
+                is.close();
+
+                if (!isFail && !isStop & !isCancel) {
+                    // 当前任务完成
+                    task.setFinish(true);
+                    entity.syncToDb();
+                    LogUtil.d(TAG, "当前任务完成 -->" + isDownloading + " -> " + task.getDownloadedSize());
+
+                    // 检查下载完成
+                    synchronized (entity) {
+                        completeNum++;
+                        if (completeNum == unFinishNum) {
+                            LogUtil.d(TAG, "下载完成" + entity.getDownloadedSize() + "/"
+                                    + entity.getFileLength() + "-->task total len=" + entity.getTaskDownloadLen());
                             reset();
-//                            entity.setStatus(DownloadStatus.FINISHED);
-//                            entity.syncToDb();
                             DownloadUtil.downloaderMap.remove(entity.getFileUrl());
                             entity.deleteFromDb();
                             listener.onFinish(entity.getFileUrl(), entity.getFilePath());
                         }
                     }
+                } else {
+                    LogUtil.d(TAG, "isFail=" + isFail + " isStop=" + isStop + " isCancel=" + isCancel);
                 }
-                file.close();
-                is.close();
 
                 // 处理总体的取消和暂停事件
                 if (isCancel) {
                     synchronized (entity) {
                         cancelNum++;
-                        if (cancelNum == DownloadUtil.threadNum) {
+                        if (cancelNum == unFinishNum) {
                             reset();
+                            DownloadUtil.downloaderMap.remove(entity.getFileUrl());
                             entity.deleteFromDb();
                             FileUtil.deleteFile(entity.getFilePath());
-                            DownloadUtil.downloaderMap.remove(entity.getFileUrl());
                             listener.onCancel(entity.getFileUrl());
                         }
                     }
@@ -119,7 +141,9 @@ public class Downloader {
                 if (isStop) {
                     synchronized (entity) {
                         stopNum++;
-                        if (stopNum == DownloadUtil.threadNum) {
+                        LogUtil.d(TAG, task.getDownloadedSize() + "bytes --> stop task " + stopNum);
+                        if (stopNum == unFinishNum) {
+                            LogUtil.d(TAG, " all stoped");
                             reset();
                             entity.setStatus(DownloadStatus.STOPED);
                             entity.syncToDb();
@@ -129,16 +153,24 @@ public class Downloader {
                 }
 
             } catch (IOException e) {
+                isDownloading = false;
+                isFail = true;
                 DownloadUtil.downloaderMap.remove(entity.getFileUrl());
                 entity.setStatus(DownloadStatus.STOPED);
                 entity.syncToDb();
                 listener.onFail(entity.getFileUrl(), entity.getDownloadedSize() + "/" + entity.getFileLength());
-                LogUtil.e("Downloader", Thread.currentThread().getName() + " IOException");
-                reset();
+                synchronized (entity) {
+                    failNum++;
+                    LogUtil.e("Downloader", Thread.currentThread().getName() + " IOException" + failNum);
+                }
                 if (entity.isDownloadFinish()) {
                     onFinish();
                 }
                 e.printStackTrace();
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
         } // run
     }
@@ -146,10 +178,15 @@ public class Downloader {
     public void start() {
         isDownloading = true;
         entity.setStatus(DownloadStatus.DOWNLOADING);
+        unFinishNum = entity.getUnFinishTask();
+        entity.printTaskInfo();
         for (DownloadTask task : entity.getTaskList()) {
-            threadPool.execute(new DownloadThread(task));
+            if (!task.isFinish()) {
+                threadPool.execute(new DownloadThread(task));
+            }
         }
     }
+
 
     /**
      * 取消下载删除已下载文件

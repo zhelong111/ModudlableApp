@@ -848,4 +848,27 @@ public class AppUtil {
         System.exit(0);
     }
 
+    /**
+     * 启动其他app的service
+     * @param action service存在完整路径 例如com.app.test.service
+     * @param mainPackage 主包名 例如com.app.test
+     */
+    public static void startServices(Context context, String action, String mainPackage) {
+        Intent intent = new Intent();
+        intent.setAction(action);
+        intent.setPackage(mainPackage);
+        context.startService(intent);
+    }
+
+    /**
+     * 启动其他APP
+     * @param packageName 主包名 例如com.app.test
+     * @param activityPath 主activity 例如com.app.test.MainActivity
+     */
+    public void startApp(Context context, String packageName, String activityPath) {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(packageName, activityPath));
+        context.startActivity(intent);
+    }
+
 }

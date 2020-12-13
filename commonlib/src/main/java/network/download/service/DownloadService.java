@@ -1,10 +1,14 @@
 package network.download.service;
 
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.view.Window;
+import android.view.WindowManager;
+
 
 import androidx.annotation.Nullable;
 
@@ -119,6 +123,19 @@ public class DownloadService extends Service implements DownloadListener {
 
         LogUtil.d(TAG, "onFinish");
 //        DownloadDispatcher.Companion.getInstance().dispatchFinish(fileUrl, filePath);
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog tipDialog = new AlertDialog.Builder(DownloadService.this).setTitle("安装消息")
+                        .setMessage(filePath)
+                        .setPositiveButton("aa", null)
+                        .setNegativeButton("bb", null).create();
+                tipDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+                tipDialog.show();
+            }
+        });
+
 
     }
 

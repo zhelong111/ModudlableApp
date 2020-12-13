@@ -3,16 +3,18 @@ package com.bruce.modulableapp;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bruce.moduleapp.chat.ChatUtil;
-
-import java.io.File;
 
 import common.BaseApplication;
 import network.download.DownloadUtil;
@@ -24,6 +26,7 @@ import ui.tip.TipUtil;
 import util.FileUtil;
 import util.LogUtil;
 import util.SystemUtil;
+import util.TextUtil;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -46,7 +49,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 调用chat模块的功能
         ChatUtil.sendMsg("hallo world");
 
-
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if (!Settings.canDrawOverlays(this)) {
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+//                        Uri.parse("package:" + getPackageName()));
+//                startActivityForResult(intent, 1);
+//            }
+//        }
 
 //        CacheUtils.setLong(fileUrl3, 0);
 
@@ -79,20 +88,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        String url = fileUrl;
         switch (v.getId()) {
             case R.id.btn_to_chat:
 //                ARouter.getInstance().build("/chat/chat").navigation();
                 startService();
 //                bindService();
                 break;
+            case R.id.btn_to_home:
+                if (!TextUtils.isEmpty(path)) {
+                    FileUtil.deleteFile(path);
+                }
+                break;
             case R.id.btn_retro_download:
-                fastDownload(fileUrl3);
+                fastDownload(url);
                 break;
             case R.id.btn_fast_download:
-                if (DownloadUtil.isDownloading(fileUrl3)) {
-                    DownloadUtil.stop(fileUrl3);
+                if (DownloadUtil.isDownloading(url)) {
+                    DownloadUtil.stop(url);
                 } else {
-                    DownloadUtil.resume(fileUrl3);
+                    DownloadUtil.resume(url);
                 }
                 break;
         }
@@ -137,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private long startTime;
+    private String path = "";
 
     private void fastDownload(String fileUrl) {
 //        DownloadUtil.download(imgUrl2, new DownloadListenerAdapter());
@@ -159,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onFinish(String fileUrl, String filePath) {
+                LogUtil.d("Download", "onFinish");
                 String time = ((System.currentTimeMillis() - startTime)/1000f) + "s";
                 TipUtil.show(MainActivity.this, "下载完成:" + time);
                 runOnUiThread(new Runnable() {
@@ -168,21 +185,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
 //                FileUtil.deleteFile(filePath);
+                path = filePath;
                 SystemUtil.installApp(MainActivity.this, filePath);
             }
 
             @Override
             public void onStop(String fileUrl, long downloadedSize) {
                 TipUtil.show(MainActivity.this, "onStop:" + downloadedSize);
+                LogUtil.d("Download", "onStop " + downloadedSize);
             }
 
             @Override
             public void onCancel(String fileUrl) {
                 TipUtil.show(MainActivity.this, "onCancel");
+                LogUtil.d("Download", "onCancel");
             }
 
             @Override
             public void onFail(String fileUrl, String errorMsg) {
+                LogUtil.d("Download", "onFail");
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

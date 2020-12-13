@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -153,4 +154,13 @@ public class SystemUtil {
         context.startActivity(intent);
     }
 
+    public static void requestOverlayPermission(Activity context, int requestCode) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(context)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + context.getPackageName()));
+                context.startActivityForResult(intent, requestCode);
+            }
+        }
+    }
 }

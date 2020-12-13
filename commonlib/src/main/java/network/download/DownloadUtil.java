@@ -120,9 +120,10 @@ public class DownloadUtil {
                     downloaderMap.put(fileUrl, downloader);
                     downloader.start();
                 } else {
-                    if (downloaderMap.get(fileUrl) != null) {
+                    if (downloaderMap.get(fileUrl) != null) { // 内存中有下载任务
                         TipUtil.show(BaseApplication.getContext(), "正在下载..");
                     } else { // 进程可能被杀死后，继续开始下载
+                        entity.setDownloadedSize(entity.getTaskDownloadLen());
                         TipUtil.show(BaseApplication.getContext(), "继续下载2");
                         Downloader downloader = new Downloader(entity, listener);
                         downloaderMap.put(fileUrl, downloader);

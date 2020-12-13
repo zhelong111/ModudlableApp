@@ -13,6 +13,7 @@ import org.greenrobot.greendao.converter.PropertyConverter;
 import java.io.Serializable;
 import java.util.List;
 import util.CacheUtils;
+import util.LogUtil;
 
 /************************************************
  * Function： 下载实体
@@ -152,9 +153,34 @@ public class DownloadEntity   {
         for (DownloadTask task : taskList) {
             taskDownloadedSize += task.getDownloadedSize();
         }
-        if (taskDownloadedSize == fileLength) {
+        if (taskDownloadedSize >= fileLength) {
             return true;
         }
         return false;
+    }
+
+    public long getTaskDownloadLen() {
+        long taskDownloadedSize = 0;
+        for (DownloadTask task : taskList) {
+            taskDownloadedSize += task.getDownloadedSize();
+        }
+        return taskDownloadedSize;
+    }
+
+    public void printTaskInfo() {
+        for (DownloadTask task : taskList) {
+            LogUtil.d("Downloader", "isFinish=" + task.isFinish() + " downloadSize=" + task.getDownloadedSize()
+                    + " startPos=" + task.getStartPos() + " endPos=" + task.getEndPos());
+        }
+    }
+
+    public int getUnFinishTask() {
+        int num = 0;
+        for (DownloadTask task : taskList) {
+            if (!task.isFinish()) {
+                num++;
+            }
+        }
+        return num;
     }
 }

@@ -32,7 +32,11 @@ public class TipUtil {
 
     public static void show(Context context, final String msg) {
         if (toast == null) {
-            toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
+            synchronized (TipUtil.class) {
+                if (toast == null) {
+                    toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
+                }
+            }
         }
         toast.setText(msg);
         toast.show();
